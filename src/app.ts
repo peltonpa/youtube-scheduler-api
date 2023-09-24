@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { Pool } from 'pg';
 
 const app = express();
-dotenv.config(); //Reads .env file and makes it accessible via process.env
+dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
 app.get("/test", (req: Request, res: Response) => {
   res.send("This is a test");

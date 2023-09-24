@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 import { User } from './entity/User';
 import { Owner } from './entity/Owner';
 
-dotenv.config();
+dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -19,3 +19,19 @@ export const AppDataSource = new DataSource({
   migrations: [__dirname + '/migration/*.ts'],
   subscribers: [],
 });
+
+export const TestDataSource = new DataSource({
+  type: 'postgres',
+  host: process.env.DB_HOST,
+  username: process.env.DB_USER,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: parseInt(process.env.DB_PORT || '5432'),
+  synchronize: true,
+  logging: true,
+  dropSchema: true,
+  entities: [User, Owner],
+  migrations: [__dirname + '/migration/*.ts'],
+  subscribers: [],
+});
+
