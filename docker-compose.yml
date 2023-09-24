@@ -10,6 +10,27 @@ services:
       - db
     volumes:
     - .:/usr/src/app
+    env_file: .env.development
+    environment:
+      - NODE_ENV=development
+    networks:
+      - mynetwork
+
+  test:
+    container_name: api-test
+    restart: always
+    build: .
+    ports:
+      - ${PORT}:${PORT}
+    depends_on:
+      - db
+    volumes:
+    - .:/usr/src/app
+    env_file: ./.env.test
+    environment:
+      - NODE_ENV=test
+    networks:
+      - mynetwork
 
   db:
     container_name: postgres
@@ -21,6 +42,12 @@ services:
     environment:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
+    networks:
+      - mynetwork
 
 volumes: 
  data: {}
+
+networks:
+  mynetwork:
+    driver: bridge
