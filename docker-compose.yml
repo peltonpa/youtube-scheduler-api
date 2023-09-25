@@ -21,7 +21,7 @@ services:
     container_name: api-test
     restart: always
     build:
-      context: ..
+      context: .
       dockerfile: ./test.Dockerfile
     ports:
       - ${PORT}:${PORT}
