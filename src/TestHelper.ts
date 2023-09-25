@@ -22,11 +22,11 @@ export class TestHelper {
 
   private async startup(): Promise<void> {
     try {
-      console.info("Starting up test server...");
+      console.info('Starting up test server...');
       this._connection = TestDataSource;
-      console.info("Connecting...");
+      console.info('Connecting...');
       await this._connection.initialize();
-      console.info("Launching server...");
+      console.info('Launching server...');
       this._app = await build();
     } catch (error) {
       console.error('testing error', error);
