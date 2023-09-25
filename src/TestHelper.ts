@@ -1,10 +1,10 @@
-import express from 'express';
 import { DataSource } from 'typeorm';
-import { createDatabase } from 'typeorm-extension';
+import { FastifyInstance } from 'fastify';
 import { TestDataSource } from './data-source';
+import build from './app';
 
 export class TestHelper {
-  private _app: express.Application;
+  private _app: FastifyInstance;
   private _connection: DataSource;
 
   public get app() {
@@ -17,20 +17,17 @@ export class TestHelper {
 
   public async close(): Promise<void> {
     await this._connection.destroy();
+    await this._app.close();
   }
 
   private async startup(): Promise<void> {
     try {
+      console.info("Starting up test server...");
       this._connection = TestDataSource;
+      console.info("Connecting...");
       await this._connection.initialize();
-      await createDatabase({
-        options: {
-          type: 'postgres',
-          database: process.env.DB_NAME,
-        },
-      });
-      await this._connection.runMigrations();
-      this._app = express();
+      console.info("Launching server...");
+      this._app = await build();
     } catch (error) {
       console.error('testing error', error);
     }
