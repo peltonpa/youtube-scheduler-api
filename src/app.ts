@@ -1,12 +1,12 @@
-import express, { Request, Response } from "express";
-import dotenv from "dotenv";
+import express, { Request, Response } from 'express';
+import dotenv from 'dotenv';
 import { Pool } from 'pg';
 
 const app = express();
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
-app.get("/test", (req: Request, res: Response) => {
-  res.send("This is a test");
+app.get('/test', (req: Request, res: Response) => {
+  res.send('This is a test');
 });
 
 app.listen(process.env.PORT, () => {
@@ -18,7 +18,7 @@ const pool = new Pool({
   user: process.env.DB_USER,
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
-  port: parseInt(process.env.DB_PORT || "5432")
+  port: parseInt(process.env.DB_PORT || '5432'),
 });
 
 const connectToDB = async () => {
@@ -29,4 +29,3 @@ const connectToDB = async () => {
   }
 };
 connectToDB();
-
