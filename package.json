@@ -27,7 +27,9 @@
     "dev": "nodemon -L -e ts --exec \"npm run build && npm start\"",
     "build": "tsc",
     "typeorm": "typeorm-ts-node-commonjs",
-    "test": "NODE_ENV=test jest"
+    "test": "NODE_ENV=test jest",
+    "prettier:check": "prettier --check \"src/**/*.ts\"",
+    "prettier": "prettier --write \"src/**/*.ts\""
   },
   "author": "",
   "license": "ISC",

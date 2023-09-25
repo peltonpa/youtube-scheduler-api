@@ -9,7 +9,8 @@ services:
     depends_on:
       - db
     volumes:
-    - .:/usr/src/app
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
     env_file: .env.development
     environment:
       - NODE_ENV=development
@@ -19,13 +20,16 @@ services:
   test:
     container_name: api-test
     restart: always
-    build: .
+    build:
+      context: .
+      dockerfile: ./test.Dockerfile
     ports:
       - ${PORT}:${PORT}
     depends_on:
       - db
     volumes:
-    - .:/usr/src/app
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
     env_file: ./.env.test
     environment:
       - NODE_ENV=test

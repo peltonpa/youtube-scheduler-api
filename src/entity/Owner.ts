@@ -8,6 +8,5 @@ export class Owner {
 
   @OneToMany(() => User, (user: User) => user.owner, { eager: true })
   @JoinTable()
-  users: User[]
+  users: User[];
 }
-
