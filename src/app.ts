@@ -13,9 +13,9 @@ function build(opts = {}) {
   });
 
   app.post('/users', async (request, reply) => {
-    const { name, video_queue } = request.body as any;
+    const { ownerId, name, video_queue } = request.body as any;
     const userRepository = handleGetRepository('User');
-    const user = userRepository.create({ name, video_queue });
+    const user = userRepository.create({ name, video_queue, owner: { id: ownerId } });
     const savedUser = await userRepository.save(user);
     return reply.code(201).send({ data: { user: savedUser } });
   });
