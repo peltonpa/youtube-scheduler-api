@@ -1,0 +1,27 @@
+name: Lint and test
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  workflow_call:
+
+jobs:
+  test:
+    name: Runs Prettier and tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout code
+        with:
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+          fetch-depth: 0
+
+      - name: Run prettier
+        run: docker-compose --env-file .env.test run test npm run prettier:check --force-recreate --build
+
+      - name: Run tests
+        run: docker-compose --env-file .env.test run test npm run test
