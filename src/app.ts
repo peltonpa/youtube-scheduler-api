@@ -1,31 +1,52 @@
-import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
-import { Pool } from 'pg';
+import Fastify from 'fastify';
+import { AppDataSource } from './data-source';
+import { handleGetRepository } from './utils/utils';
 
-const app = express();
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
-app.get('/test', (req: Request, res: Response) => {
-  res.send('This is a test');
+function build(opts = {}) {
+  const app = Fastify(opts);
+
+  app.get('/test', async (request, reply) => {
+    return { test: 'test' };
+  });
+
+  app.post('/users', async (request, reply) => {
+    const { name, video_queue } = request.body as any;
+    const userRepository = handleGetRepository('User');
+    const user = userRepository.create({ name, video_queue });
+    const savedUser = await userRepository.save(user);
+    return reply.code(201).send({ data: { user: savedUser } });
+  });
+
+  return app;
+}
+
+const server = build({
+  logger: {
+    level: 'info',
+    transport: {
+      target: 'pino-pretty',
+    },
+  },
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server is running at ${process.env.PORT}`);
-});
-
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: parseInt(process.env.DB_PORT || '5432'),
-});
-
-const connectToDB = async () => {
+const start = async () => {
   try {
-    await pool.connect();
+    if (!process.env.PORT) {
+      throw new Error('Missing PORT in environment variables. Cannot start Fastify');
+    }
+    await server.listen({ port: Number(process.env.PORT) });
+    await AppDataSource.initialize();
   } catch (err) {
-    console.log(err);
+    server.log.error(err);
+    process.exit(1);
   }
 };
-connectToDB();
+// Tests have their own helper to setup the database, TypeORM connection and Fastify instance
+if (process.env.NODE_ENV !== 'test') {
+  start();
+}
+
+export default build;
