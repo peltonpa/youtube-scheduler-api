@@ -20,8 +20,11 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
 
+      - name: Build Docker image
+        run: docker-compose --env-file .env.test build test
+
       - name: Run prettier
-        run: docker-compose --env-file .env.test run test npm run prettier:check --force-recreate --build
+        run: docker-compose --env-file .env.test run test npm run prettier:check
 
       - name: Run tests
         run: docker-compose --env-file .env.test run test npm run test
