@@ -97,5 +97,5 @@ describe('route-level tests', () => {
     expect(result.length).toBe(2);
     expect(result[0].id).toEqual(user1.id);
     expect(result[1].id).toEqual(user3.id);
-  })
+  });
 });

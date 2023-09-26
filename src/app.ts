@@ -55,7 +55,7 @@ function build(opts = {}) {
       const user = manager.create(User, { ownerId, name, video_queue });
       await manager.save(user);
       return reply.code(201).send({ data: user });
-    }
+    },
   );
 
   app.get<{ Params: Static<typeof UserIdSchema>; Reply: { data: UserSchemaType[] } }>(
@@ -73,7 +73,7 @@ function build(opts = {}) {
       const manager = getEntityManager();
       const users = await manager.find(User, { where: { ownerId: id } });
       return reply.code(200).send({ data: users });
-    }
+    },
   );
 
   return app;
