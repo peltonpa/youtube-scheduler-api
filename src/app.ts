@@ -43,7 +43,7 @@ function build(opts = {}) {
       const user = manager.create(User, { ownerId, name, video_queue });
       await manager.save(user);
       return reply.code(201).send({ data: user });
-    }
+    },
   );
 
   return app;

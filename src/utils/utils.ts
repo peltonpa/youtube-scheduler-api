@@ -13,4 +13,4 @@ export const handleGetRepository = <T extends ObjectLiteral>(
 export const getEntityManager = () => {
   const environment = process.env.NODE_ENV || 'development';
   return environment === 'test' ? TestDataSource.manager : AppDataSource.manager;
-}
+};
