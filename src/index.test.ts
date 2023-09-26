@@ -50,12 +50,12 @@ describe('route-level tests', () => {
       payload: {
         name: 'ismo laitela',
         video_queue: [],
-        ownerId: ownerId,
+        ownerId,
       },
     });
     const { data: result } = response.json();
     expect(response.statusCode).toBe(201);
-    expect(result.user.name).toBe('ismo laitela');
+    expect(result.name).toBe('ismo laitela');
   });
 
   it('should not be able to create user with inexistent owner id', async () => {
