@@ -3,6 +3,7 @@ import Fastify from 'fastify';
 import { Static, Type } from '@sinclair/typebox';
 import { AppDataSource } from './data-source';
 import { User } from './entity/User';
+import { Owner } from './entity/Owner';
 import { getEntityManager } from './utils/utils';
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
@@ -33,18 +34,27 @@ type UserSchemaType = Static<typeof UserSchema>;
 function build(opts = {}) {
   const app = Fastify(opts);
 
-  app.setErrorHandler(function (error, request, reply) {
-    if (error instanceof Fastify.errorCodes.FST_ERR_NOT_FOUND) {
-      app.log.error(error);
-      reply.status(404).send({ message: 'Not found' });
-    } else {
-      reply.send(error);
-    }
-  });
-
   app.get('/test', async (request, reply) => {
     return { test: 'test' };
   });
+
+  // Route to create an owner
+  app.post<{ Reply: { data: Static<typeof OwnerIdSchema> } }>(
+    '/owner',
+    {
+      schema: {
+        response: {
+          201: { type: 'object', properties: { data: OwnerIdSchema } },
+        },
+      },
+    },
+    async (request, reply) => {
+      const manager = getEntityManager();
+      const owner = manager.create(Owner);
+      await manager.save(owner);
+      return reply.status(201).send({ data: { id: owner.id } });
+    },
+  );
 
   app.post<{ Body: Static<typeof PostUserInputSchema>; Reply: { data: UserSchemaType } }>(
     '/users',

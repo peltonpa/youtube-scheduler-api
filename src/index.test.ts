@@ -136,4 +136,14 @@ describe('route-level tests', () => {
     expect(response.statusCode).toBe(200);
     expect(result).toEqual(user);
   });
+
+  it('should be able to create an owner', async () => {
+    const response = await testHelper.app.inject({
+      method: 'POST',
+      url: '/owner',
+    });
+    const { data: result } = response.json();
+    expect(response.statusCode).toBe(201);
+    expect(result).toHaveProperty('id');
+  });
 });
