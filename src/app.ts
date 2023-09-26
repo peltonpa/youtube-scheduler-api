@@ -17,8 +17,11 @@ const PostUserInputSchema = {
   ...Type.Pick({ ...UserSchema }, ['name', 'video_queue', 'ownerId']),
   additionalProperties: false,
 };
-const UserIdSchema = Type.Object({
+const OwnerIdSchema = Type.Object({
   id: Type.String({ format: 'uuid' }),
+});
+const UserIdSchema = Type.Object({
+  id: Type.String(),
 });
 const UserVideoQueueSchema = Type.Object({
   id: Type.String(),
@@ -62,11 +65,11 @@ function build(opts = {}) {
     },
   );
 
-  app.get<{ Params: Static<typeof UserIdSchema>; Reply: { data: UserSchemaType[] } }>(
+  app.get<{ Params: Static<typeof OwnerIdSchema>; Reply: { data: UserSchemaType[] } }>(
     '/users/:id',
     {
       schema: {
-        params: UserIdSchema,
+        params: OwnerIdSchema,
         response: {
           200: { type: 'object', properties: { data: Type.Array(UserSchema) } },
         },
@@ -99,6 +102,28 @@ function build(opts = {}) {
       }
       user.video_queue = video_queue;
       await manager.save(user);
+      return reply.code(200).send({ data: user });
+    },
+  );
+
+  app.delete<{ Params: Static<typeof UserIdSchema>; Reply: { data: UserSchemaType } }>(
+    '/users/:id',
+    {
+      schema: {
+        params: UserIdSchema,
+        response: {
+          200: { type: 'object', properties: { data: UserSchema } },
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params;
+      const manager = getEntityManager();
+      const user = await manager.findOne(User, { where: { id } });
+      if (!user) {
+        throw new Error('User not found');
+      }
+      await manager.delete(User, { id });
       return reply.code(200).send({ data: user });
     },
   );

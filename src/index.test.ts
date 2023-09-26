@@ -119,4 +119,21 @@ describe('route-level tests', () => {
     expect(response.statusCode).toBe(200);
     expect(result.video_queue).toEqual(['test', 'test2']);
   });
+
+  it('should be able to delete user', async () => {
+    const userRepository = handleGetRepository('User');
+    const ownerRepository = handleGetRepository('Owner');
+    const ownerId = randomUUID();
+    const owner = ownerRepository.create({ id: ownerId });
+    await ownerRepository.save(owner);
+    const user = userRepository.create({ name: 'test', video_queue: [], ownerId });
+    await userRepository.save(user);
+    const response = await testHelper.app.inject({
+      method: 'DELETE',
+      url: `/users/${user.id}`,
+    });
+    const { data: result } = response.json();
+    expect(response.statusCode).toBe(200);
+    expect(result).toEqual(user);
+  });
 });
