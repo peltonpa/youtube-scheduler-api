@@ -16,7 +16,11 @@ describe('test that typeorm can connect', () => {
 
   it('should be able to fetch users', async () => {
     const userRepository = handleGetRepository('User');
-    const user = userRepository.create({ name: 'test', video_queue: [] });
+    const ownerRepository = handleGetRepository('Owner');
+    const ownerId = randomUUID();
+    const owner = ownerRepository.create({ id: ownerId });
+    await ownerRepository.save(owner);
+    const user = userRepository.create({ name: 'test', video_queue: [], ownerId });
     await userRepository.save(user);
     const users = await userRepository.find();
     expect(users.length).toBe(1);
