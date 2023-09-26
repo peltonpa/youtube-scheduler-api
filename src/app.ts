@@ -17,11 +17,23 @@ const PostUserInputSchema = {
   ...Type.Pick({ ...UserSchema }, ['name', 'video_queue', 'ownerId']),
   additionalProperties: false,
 };
+const UserIdSchema = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+});
 
 type UserSchemaType = Static<typeof UserSchema>;
 
 function build(opts = {}) {
   const app = Fastify(opts);
+
+  app.setErrorHandler(function (error, request, reply) {
+    if (error instanceof Fastify.errorCodes.FST_ERR_NOT_FOUND) {
+      app.log.error(error);
+      reply.status(404).send({ message: 'Not found' });
+    } else {
+      reply.send(error);
+    }
+  });
 
   app.get('/test', async (request, reply) => {
     return { test: 'test' };
@@ -43,7 +55,25 @@ function build(opts = {}) {
       const user = manager.create(User, { ownerId, name, video_queue });
       await manager.save(user);
       return reply.code(201).send({ data: user });
+    }
+  );
+
+  app.get<{ Params: Static<typeof UserIdSchema>; Reply: { data: UserSchemaType[] } }>(
+    '/users/:id',
+    {
+      schema: {
+        params: UserIdSchema,
+        response: {
+          200: { type: 'object', properties: { data: Type.Array(UserSchema) } },
+        },
+      },
     },
+    async (request, reply) => {
+      const { id } = request.params;
+      const manager = getEntityManager();
+      const users = await manager.find(User, { where: { ownerId: id } });
+      return reply.code(200).send({ data: users });
+    }
   );
 
   return app;

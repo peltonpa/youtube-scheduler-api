@@ -70,4 +70,32 @@ describe('route-level tests', () => {
     });
     expect(response.statusCode).toBe(500);
   });
+
+  it('should be able to fetch users', async () => {
+    const userRepository = handleGetRepository('User');
+    const ownerRepository = handleGetRepository('Owner');
+    const ownerId1 = randomUUID();
+    const ownerId2 = randomUUID();
+    const owner1 = ownerRepository.create({ id: ownerId1 });
+    const owner2 = ownerRepository.create({ id: ownerId2 });
+    await ownerRepository.save(owner1);
+    await ownerRepository.save(owner2);
+
+    const user1 = userRepository.create({ name: randomUUID(), video_queue: [], ownerId: ownerId1 });
+    const user2 = userRepository.create({ name: randomUUID(), video_queue: [], ownerId: ownerId2 });
+    const user3 = userRepository.create({ name: randomUUID(), video_queue: [], ownerId: ownerId1 });
+
+    await userRepository.save(user1);
+    await userRepository.save(user2);
+    await userRepository.save(user3);
+    const response = await testHelper.app.inject({
+      method: 'GET',
+      url: `/users/${ownerId1}`,
+    });
+    const { data: result } = response.json();
+    expect(response.statusCode).toBe(200);
+    expect(result.length).toBe(2);
+    expect(result[0].id).toEqual(user1.id);
+    expect(result[1].id).toEqual(user3.id);
+  })
 });
