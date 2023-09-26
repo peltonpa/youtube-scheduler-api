@@ -17,8 +17,11 @@ const PostUserInputSchema = {
   ...Type.Pick({ ...UserSchema }, ['name', 'video_queue', 'ownerId']),
   additionalProperties: false,
 };
-const UserIdSchema = Type.Object({
+const OwnerIdSchema = Type.Object({
   id: Type.String({ format: 'uuid' }),
+});
+const UserIdSchema = Type.Object({
+  id: Type.String(),
 });
 const UserVideoQueueSchema = Type.Object({
   id: Type.String(),
@@ -59,14 +62,14 @@ function build(opts = {}) {
       const user = manager.create(User, { ownerId, name, video_queue });
       await manager.save(user);
       return reply.code(201).send({ data: user });
-    },
+    }
   );
 
-  app.get<{ Params: Static<typeof UserIdSchema>; Reply: { data: UserSchemaType[] } }>(
+  app.get<{ Params: Static<typeof OwnerIdSchema>; Reply: { data: UserSchemaType[] } }>(
     '/users/:id',
     {
       schema: {
-        params: UserIdSchema,
+        params: OwnerIdSchema,
         response: {
           200: { type: 'object', properties: { data: Type.Array(UserSchema) } },
         },
@@ -77,7 +80,7 @@ function build(opts = {}) {
       const manager = getEntityManager();
       const users = await manager.find(User, { where: { ownerId: id } });
       return reply.code(200).send({ data: users });
-    },
+    }
   );
 
   app.put<{ Body: Static<typeof UserVideoQueueSchema>; Reply: { data: UserSchemaType } }>(
@@ -100,7 +103,29 @@ function build(opts = {}) {
       user.video_queue = video_queue;
       await manager.save(user);
       return reply.code(200).send({ data: user });
+    }
+  );
+
+  app.delete<{ Params: Static<typeof UserIdSchema>; Reply: { data: UserSchemaType } }>(
+    '/users/:id',
+    {
+      schema: {
+        params: UserIdSchema,
+        response: {
+          200: { type: 'object', properties: { data: UserSchema } },
+        },
+      },
     },
+    async (request, reply) => {
+      const { id } = request.params;
+      const manager = getEntityManager();
+      const user = await manager.findOne(User, { where: { id } });
+      if (!user) {
+        throw new Error('User not found');
+      }
+      await manager.delete(User, { id });
+      return reply.code(200).send({ data: user });
+    }
   );
 
   return app;
