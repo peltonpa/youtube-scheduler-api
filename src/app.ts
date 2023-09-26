@@ -20,6 +20,10 @@ const PostUserInputSchema = {
 const UserIdSchema = Type.Object({
   id: Type.String({ format: 'uuid' }),
 });
+const UserVideoQueueSchema = Type.Object({
+  id: Type.String(),
+  video_queue: Type.Array(Type.String()),
+});
 
 type UserSchemaType = Static<typeof UserSchema>;
 
@@ -73,6 +77,29 @@ function build(opts = {}) {
       const manager = getEntityManager();
       const users = await manager.find(User, { where: { ownerId: id } });
       return reply.code(200).send({ data: users });
+    },
+  );
+
+  app.put<{ Body: Static<typeof UserVideoQueueSchema>; Reply: { data: UserSchemaType } }>(
+    '/users/update-video-queue',
+    {
+      schema: {
+        body: UserVideoQueueSchema,
+        response: {
+          200: { type: 'object', properties: { data: UserSchema } },
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id, video_queue } = request.body;
+      const manager = getEntityManager();
+      const user = await manager.findOne(User, { where: { id } });
+      if (!user) {
+        throw new Error('User not found');
+      }
+      user.video_queue = video_queue;
+      await manager.save(user);
+      return reply.code(200).send({ data: user });
     },
   );
 
