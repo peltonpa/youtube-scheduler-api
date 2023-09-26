@@ -1,9 +1,24 @@
 import dotenv from 'dotenv';
 import Fastify from 'fastify';
+import { Static, Type } from '@sinclair/typebox';
 import { AppDataSource } from './data-source';
-import { handleGetRepository } from './utils/utils';
+import { User } from './entity/User';
+import { getEntityManager } from './utils/utils';
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
+
+const UserSchema = Type.Object({
+  id: Type.String(),
+  name: Type.String(),
+  video_queue: Type.Array(Type.String()),
+  ownerId: Type.String({ format: 'uuid' }),
+});
+const PostUserInputSchema = {
+  ...Type.Pick({ ...UserSchema }, ['name', 'video_queue', 'ownerId']),
+  additionalProperties: false,
+};
+
+type UserSchemaType = Static<typeof UserSchema>;
 
 function build(opts = {}) {
   const app = Fastify(opts);
@@ -12,13 +27,24 @@ function build(opts = {}) {
     return { test: 'test' };
   });
 
-  app.post('/users', async (request, reply) => {
-    const { ownerId, name, video_queue } = request.body as any;
-    const userRepository = handleGetRepository('User');
-    const user = userRepository.create({ name, video_queue, owner: { id: ownerId } });
-    const savedUser = await userRepository.save(user);
-    return reply.code(201).send({ data: { user: savedUser } });
-  });
+  app.post<{ Body: Static<typeof PostUserInputSchema>; Reply: { data: UserSchemaType } }>(
+    '/users',
+    {
+      schema: {
+        body: PostUserInputSchema,
+        response: {
+          201: { type: 'object', properties: { data: UserSchema } },
+        },
+      },
+    },
+    async (request, reply) => {
+      const { ownerId, name, video_queue } = request.body;
+      const manager = getEntityManager();
+      const user = manager.create(User, { ownerId, name, video_queue });
+      await manager.save(user);
+      return reply.code(201).send({ data: user });
+    }
+  );
 
   return app;
 }
