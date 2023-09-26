@@ -62,7 +62,7 @@ function build(opts = {}) {
       const user = manager.create(User, { ownerId, name, video_queue });
       await manager.save(user);
       return reply.code(201).send({ data: user });
-    }
+    },
   );
 
   app.get<{ Params: Static<typeof OwnerIdSchema>; Reply: { data: UserSchemaType[] } }>(
@@ -80,7 +80,7 @@ function build(opts = {}) {
       const manager = getEntityManager();
       const users = await manager.find(User, { where: { ownerId: id } });
       return reply.code(200).send({ data: users });
-    }
+    },
   );
 
   app.put<{ Body: Static<typeof UserVideoQueueSchema>; Reply: { data: UserSchemaType } }>(
@@ -103,7 +103,7 @@ function build(opts = {}) {
       user.video_queue = video_queue;
       await manager.save(user);
       return reply.code(200).send({ data: user });
-    }
+    },
   );
 
   app.delete<{ Params: Static<typeof UserIdSchema>; Reply: { data: UserSchemaType } }>(
@@ -125,7 +125,7 @@ function build(opts = {}) {
       }
       await manager.delete(User, { id });
       return reply.code(200).send({ data: user });
-    }
+    },
   );
 
   return app;
