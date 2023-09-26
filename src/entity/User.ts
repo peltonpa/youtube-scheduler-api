@@ -1,22 +1,25 @@
-import { Entity, PrimaryColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne, BeforeInsert } from 'typeorm';
 import { Owner } from './Owner';
+import { randomUUID } from 'crypto';
 
 @Entity()
 export class User {
-  @PrimaryColumn('text', { default: () => `${5}` })
+  @PrimaryColumn('text')
   id: string;
+
+  @BeforeInsert()
+  setId() {
+    this.id = randomUUID().substring(0, 6);
+  }
 
   @Column()
   name: string;
 
-  @Column('int', { default: 0 })
-  videos_played: number;
-
-  @Column({ nullable: true })
-  last_played_timestamp: Date;
-
   @Column('text', { array: true })
   video_queue: string[];
+
+  @Column('text')
+  ownerId: string;
 
   @ManyToOne(() => Owner, (owner: Owner) => owner.users)
   owner: Owner;
