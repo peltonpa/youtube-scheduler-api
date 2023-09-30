@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import Fastify from 'fastify';
+import cors from '@fastify/cors';
 import { Static, Type } from '@sinclair/typebox';
 import { AppDataSource } from './data-source';
 import { User } from './entity/User';
@@ -12,12 +13,12 @@ const UserSchema = Type.Object({
   id: Type.String(),
   name: Type.String(),
   video_queue: Type.Array(Type.String()),
+});
+const PostUserInputSchema = Type.Object({
+  name: Type.String(),
+  video_queue: Type.Array(Type.String()),
   ownerId: Type.String({ format: 'uuid' }),
 });
-const PostUserInputSchema = {
-  ...Type.Pick({ ...UserSchema }, ['name', 'video_queue', 'ownerId']),
-  additionalProperties: false,
-};
 const OwnerIdSchema = Type.Object({
   id: Type.String({ format: 'uuid' }),
 });
@@ -33,6 +34,10 @@ type UserSchemaType = Static<typeof UserSchema>;
 
 function build(opts = {}) {
   const app = Fastify(opts);
+
+  app.register(cors, {
+    origin: 'http://localhost:3000',
+  });
 
   app.get('/test', async (request, reply) => {
     return { test: 'test' };
@@ -155,7 +160,7 @@ const start = async () => {
     if (!process.env.PORT) {
       throw new Error('Missing PORT in environment variables. Cannot start Fastify');
     }
-    await server.listen({ port: Number(process.env.PORT) });
+    await server.listen({ port: Number(process.env.PORT), host: '0.0.0.0' });
     await AppDataSource.initialize();
   } catch (err) {
     server.log.error(err);
