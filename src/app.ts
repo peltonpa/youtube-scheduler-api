@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import Fastify from 'fastify';
+import cors from '@fastify/cors';
 import { Static, Type } from '@sinclair/typebox';
 import { AppDataSource } from './data-source';
 import { User } from './entity/User';
@@ -33,6 +34,10 @@ type UserSchemaType = Static<typeof UserSchema>;
 
 function build(opts = {}) {
   const app = Fastify(opts);
+
+  app.register(cors, {
+    origin: 'http://localhost:3000',
+  });
 
   app.get('/test', async (request, reply) => {
     return { test: 'test' };
