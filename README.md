@@ -5,7 +5,7 @@ This is an API for running Youtube videos in browser so that multiple users can 
 
 ## How to run dev?
 1. `docker-compose --env-file .env.development build api`
-2. `docker-compose --env-file .env.development run api`
+2. `docker-compose --env-file .env.development up api`
 
 ## How to run tests?
 `docker-compose --env-file .env.test build test`
