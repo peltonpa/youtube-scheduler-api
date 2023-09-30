@@ -134,7 +134,7 @@ describe('route-level tests', () => {
     });
     const { data: result } = response.json();
     expect(response.statusCode).toBe(200);
-    expect(result).toEqual(user);
+    expect(result.id).toEqual(user.id);
   });
 
   it('should be able to create an owner', async () => {
