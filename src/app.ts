@@ -160,7 +160,7 @@ const start = async () => {
     if (!process.env.PORT) {
       throw new Error('Missing PORT in environment variables. Cannot start Fastify');
     }
-    await server.listen({ port: Number(process.env.PORT) });
+    await server.listen({ port: Number(process.env.PORT), host: '0.0.0.0' });
     await AppDataSource.initialize();
   } catch (err) {
     server.log.error(err);
