@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@fastify/cors": "^8.4.0",
     "@fastify/type-provider-typebox": "^3.5.0",
     "@sinclair/typebox": "^0.31.16",
     "fastify": "^4.23.2",
