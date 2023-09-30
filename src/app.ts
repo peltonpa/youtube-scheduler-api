@@ -12,12 +12,12 @@ const UserSchema = Type.Object({
   id: Type.String(),
   name: Type.String(),
   video_queue: Type.Array(Type.String()),
+});
+const PostUserInputSchema = Type.Object({
+  name: Type.String(),
+  video_queue: Type.Array(Type.String()),
   ownerId: Type.String({ format: 'uuid' }),
 });
-const PostUserInputSchema = {
-  ...Type.Pick({ ...UserSchema }, ['name', 'video_queue', 'ownerId']),
-  additionalProperties: false,
-};
 const OwnerIdSchema = Type.Object({
   id: Type.String({ format: 'uuid' }),
 });
