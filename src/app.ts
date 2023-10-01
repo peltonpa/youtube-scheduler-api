@@ -152,7 +152,7 @@ function build(opts = {}) {
       schema: {
         params: UserIdSchema,
         response: {
-          200: { type: 'object', properties: { data: UserSchema } },
+          200: { type: 'object', properties: { data: UserVideoQueueSchema } },
         },
       },
     },
