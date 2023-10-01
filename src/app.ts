@@ -143,6 +143,30 @@ function build(opts = {}) {
     },
   );
 
+  app.get<{
+    Params: Static<typeof UserIdSchema>;
+    Reply: { data: Static<typeof UserVideoQueueSchema> };
+  }>(
+    '/users/video-queue/:id',
+    {
+      schema: {
+        params: UserIdSchema,
+        response: {
+          200: { type: 'object', properties: { data: UserVideoQueueSchema } },
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params;
+      const manager = getEntityManager();
+      const user = await manager.findOne(User, { where: { id } });
+      if (!user) {
+        throw new Error('User not found');
+      }
+      return reply.code(200).send({ data: { id: user.id, video_queue: user.video_queue } });
+    },
+  );
+
   return app;
 }
 

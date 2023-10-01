@@ -146,4 +146,21 @@ describe('route-level tests', () => {
     expect(response.statusCode).toBe(201);
     expect(result).toHaveProperty('id');
   });
+
+  it('should be possible to fetch own video_queue for user', async () => {
+    const userRepository = handleGetRepository('User');
+    const ownerRepository = handleGetRepository('Owner');
+    const ownerId = randomUUID();
+    const owner = ownerRepository.create({ id: ownerId });
+    await ownerRepository.save(owner);
+    const user = userRepository.create({ name: 'test', video_queue: ['test', 'test2'], ownerId });
+    await userRepository.save(user);
+    const response = await testHelper.app.inject({
+      method: 'GET',
+      url: `/users/video-queue/${user.id}`,
+    });
+    const { data: result } = response.json();
+    expect(response.statusCode).toBe(200);
+    expect(result.video_queue).toEqual(['test', 'test2']);
+  });
 });
