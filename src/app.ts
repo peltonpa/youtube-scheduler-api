@@ -25,6 +25,8 @@ const OwnerIdSchema = Type.Object({
 const UserIdSchema = Type.Object({
   id: Type.String(),
 });
+const YoutubeVideoIdSchema = Type.Object({ id: Type.String() });
+const YoutubeVideoTitleSchema = Type.String();
 const UserVideoQueueSchema = Type.Object({
   id: Type.String(),
   video_queue: Type.Array(Type.String()),
@@ -164,6 +166,38 @@ function build(opts = {}) {
         throw new Error('User not found');
       }
       return reply.code(200).send({ data: { id: user.id, video_queue: user.video_queue } });
+    },
+  );
+
+  // Just to save some key bandwidth for repeated id queries, this is not necessary.
+  const idTitleMap: { [key: string]: string } = {};
+
+  app.get<{
+    Params: Static<typeof YoutubeVideoIdSchema>;
+    Reply: { data: Static<typeof YoutubeVideoTitleSchema> };
+  }>(
+    '/video-id/:id',
+    {
+      schema: {
+        params: YoutubeVideoIdSchema,
+        response: {
+          200: { type: 'object', properties: { data: YoutubeVideoTitleSchema } },
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params;
+      const title = idTitleMap[id];
+      if (title) {
+        return reply.code(200).send({ data: title });
+      }
+      const response = await fetch(
+        `https://www.googleapis.com/youtube/v3/videos?id=${id}&key=${process.env.YT_API_KEY}&part=snippet`,
+      );
+      const json = await response.json();
+      const titleFromJson = json.items[0].snippet.title;
+      idTitleMap[id] = titleFromJson;
+      return reply.code(200).send({ data: titleFromJson });
     },
   );
 
